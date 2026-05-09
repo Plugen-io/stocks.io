@@ -1,0 +1,33 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+
+# Cripto — NUNCA comitar
+**/certs/
+**/*.pem
+**/*.key
+**/*.crt
+**/*.csr
+!packages/shared/src/cert-utils.ts
+
+# Estado local do client agent (contém chave privada do device)
+.stockio-client/
+~/.stockio-client/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+packages/server/prisma/migrations/dev.db*

@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Device {
+  id              String   @id @default(uuid())
+  cpuFingerprint  String
+  label           String?
+  enrolledAt      DateTime @default(now())
+  lastSeenAt      DateTime?
+
+  certificates    Certificate[]
+  inflows         Inflow[]
+  heartbeats      Heartbeat[]
+
+  @@index([cpuFingerprint])
+}
+
+model Certificate {
+  id              String   @id @default(uuid())
+  deviceId        String
+  device          Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+
+  serialNumber    String   @unique
+  version         Int      // ordem (1 = primeiro cert do device, 2 = renovação...)
+  pemCert         String   @db.Text
+  csrPem          String   @db.Text
+  caVersion       Int      // qual CA assinou
+
+  issuedAt        DateTime @default(now())
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  revokedReason   String?
+  supersededAt    DateTime? // quando foi substituído por uma renovação
+
+  status          String   @default("active") // active | expired | revoked | superseded
+
+  inflows         Inflow[]
+  heartbeats      Heartbeat[]
+
+  @@index([deviceId, status])
+  @@index([status, expiresAt])
+}
+
+model EnrollmentToken {
+  id          String   @id @default(uuid())
+  token       String   @unique
+  used        Boolean  @default(false)
+  usedAt      DateTime?
+  usedByDeviceId String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  createdByAdminId String?
+
+  @@index([token, used])
+}
+
+model Inflow {
+  id              String   @id @default(uuid())
+  deviceId        String
+  device          Device   @relation(fields: [deviceId], references: [id])
+  certificateId   String
+  certificate     Certificate @relation(fields: [certificateId], references: [id])
+
+  amountBRL       Decimal  @db.Decimal(12, 2)
+  idempotencyKey  String   @unique
+  success         Boolean
+  errorCode       String?
+  createdAt       DateTime @default(now())
+
+  @@index([deviceId, createdAt])
+}
+
+model Heartbeat {
+  id              String   @id @default(uuid())
+  deviceId        String
+  device          Device   @relation(fields: [deviceId], references: [id])
+  certificateId   String
+  certificate     Certificate @relation(fields: [certificateId], references: [id])
+
+  ts              DateTime @default(now())
+  latencyMs       Int?
+  ip              String?
+  agentVersion    String?
+  uptimeSec       Int?
+
+  @@index([deviceId, ts])
+}
+
+model AdminUser {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String
+  createdAt     DateTime @default(now())
+}
+
+model ServerCA {
+  id            String   @id @default(uuid())
+  version       Int      @unique
+  pemCert       String   @db.Text
+  pemKey        String   @db.Text  // CRIPTOGRAFAR em produção
+  active        Boolean  @default(false)
+  retiredAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  // Cross-sign: este CA assinado pelo CA de versão X
+  crossSignedByVersion Int?
+  crossSignedPem       String? @db.Text
+}
