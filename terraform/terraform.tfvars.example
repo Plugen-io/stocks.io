@@ -1,0 +1,22 @@
+# Copie pra `terraform.tfvars` e preencha (gitignored).
+
+aws_region    = "us-east-1"      # us-east-1 é mais barato e Free Tier
+instance_type = "t3.micro"       # Free Tier 12 meses
+
+# SSH — escolha UM dos dois
+ssh_public_key_path = "~/.ssh/id_rsa.pub"
+# ssh_public_key    = "ssh-rsa AAAA..."
+
+# CRÍTICO: limite o SSH ao seu IP público.
+# Descobrir seu IP: curl ifconfig.me
+ssh_allowed_cidr = "200.10.20.30/32"
+
+# Hostname público — usado no cert mTLS
+hostname = "mtls-poc.accoutre.com.br"
+
+# DNS
+create_route53_record = false   # true se a zona estiver no Route 53
+# route53_zone_id     = "Z1234567890ABC"
+
+enable_mysql  = true
+node_version  = "22"

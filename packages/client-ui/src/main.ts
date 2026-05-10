@@ -1,13 +1,21 @@
-async function loadStatus() {
-  const out = document.getElementById('status-out')!;
+const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
+  document.getElementById(id) as T | null;
+
+async function pollAgent() {
+  const status = $<HTMLSpanElement>('agent-status');
+  const out = $<HTMLPreElement>('status-out');
+  if (!status || !out) return;
+
   try {
     const res = await fetch('/api/health');
     const data = await res.json();
+    status.textContent = data.initialized ? 'enrolado' : 'aguarda setup';
     out.textContent = JSON.stringify(data, null, 2);
-  } catch (err) {
-    out.textContent = `agent offline: ${(err as Error).message}\n\nInicie o agent com: npm run dev:agent`;
-    out.classList.add('text-amber-400');
+  } catch {
+    status.textContent = 'offline';
+    out.textContent = 'agent offline\n\ninicie com: npm run dev:agent';
   }
 }
 
-loadStatus();
+pollAgent();
+setInterval(pollAgent, 5000);

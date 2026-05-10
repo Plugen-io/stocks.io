@@ -1,0 +1,18 @@
+<svg width="160" height="32" viewBox="0 0 160 32" xmlns="http://www.w3.org/2000/svg" aria-label="stocks.io">
+  <!-- Mark -->
+  <g transform="translate(0, 4)">
+    <rect x="2"  y="15" width="3" height="7"  fill="#a1a1aa" rx="0.5"/>
+    <rect x="6"  y="11" width="3" height="11" fill="#a1a1aa" rx="0.5"/>
+    <rect x="10" y="14" width="3" height="8"  fill="#d4d4d8" rx="0.5"/>
+    <rect x="14" y="8"  width="3" height="14" fill="#d4d4d8" rx="0.5"/>
+    <rect x="18" y="4"  width="3" height="18" fill="#22c55e" rx="0.5"/>
+    <line x1="19.5" y1="1" x2="19.5" y2="4" stroke="#22c55e" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Wordmark "stocks.io" -->
+  <g transform="translate(36, 0)" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="600" letter-spacing="-0.02em">
+    <text x="0" y="22" fill="#fafafa">stocks</text>
+    <circle cx="63" cy="20.5" r="1.8" fill="#22c55e"/>
+    <text x="68" y="22" fill="#a1a1aa" font-weight="400">io</text>
+  </g>
+</svg>

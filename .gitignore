@@ -31,3 +31,11 @@ Thumbs.db
 
 # Prisma
 packages/server/prisma/migrations/dev.db*
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/terraform.tfvars
+terraform/*.tfplan
