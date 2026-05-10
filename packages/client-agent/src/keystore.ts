@@ -4,7 +4,7 @@
  * Estratégia A1: a chave privada é gerada UMA VEZ no setup e nunca mais sai.
  * Renovações geram CSR a partir da MESMA chave.
  *
- * Localização: ~/.stockio-client/
+ * Localização: ~/.stocksio-client/
  *   - private.key       (chave privada do device — NUNCA sai daqui)
  *   - public.key
  *   - device.json       ({uuid, cpuFingerprint, enrolledAt, label})
@@ -15,8 +15,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { generateKeyPairPem, type KeyPairPem } from '@stock.io/shared/cert-utils';
-import type { DeviceIdentity } from '@stock.io/shared';
+import { generateKeyPairPem, type KeyPairPem } from '@stocks.io/shared/cert-utils';
+import type { DeviceIdentity } from '@stocks.io/shared';
 
 export interface DeviceState {
   identity: DeviceIdentity;
@@ -25,7 +25,7 @@ export interface DeviceState {
 }
 
 const HOME = os.homedir();
-const KEYSTORE_DIR = process.env.STOCKIO_HOME ?? path.join(HOME, '.stockio-client');
+const KEYSTORE_DIR = process.env.STOCKSIO_HOME ?? path.join(HOME, '.stocksio-client');
 
 const PATHS = {
   privateKey: path.join(KEYSTORE_DIR, 'private.key'),
@@ -49,7 +49,7 @@ export function isInitialized(): boolean {
 export function generateAndStoreKeyPair(): KeyPairPem {
   ensureDir();
   if (fs.existsSync(PATHS.privateKey)) {
-    throw new Error('Keypair já existe. Reset manual: apague ~/.stockio-client/');
+    throw new Error('Keypair já existe. Reset manual: apague ~/.stocksio-client/');
   }
   const kp = generateKeyPairPem();
   fs.writeFileSync(PATHS.privateKey, kp.privateKeyPem, { mode: 0o600 });

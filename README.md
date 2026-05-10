@@ -11,7 +11,7 @@ POC de autenticação mTLS bidirecional entre client e server, com:
 Monorepo com npm workspaces:
 
 ```
-stock.io/
+stocks.io/
 ├── packages/
 │   ├── shared/         # tipos, constantes, utils cripto (compartilhado)
 │   ├── server/         # API mTLS + painel admin (deploy: AWS EC2)
@@ -28,7 +28,7 @@ Pré-requisitos: **Node.js 22+**, **MySQL 8** (ou alternativa — ver `.env.exam
 npm install
 
 # 2. Build do pacote shared (server e agent dependem dele)
-npm run build --workspace=@stock.io/shared
+npm run build --workspace=@stocks.io/shared
 
 # 3. Bootstrap da CA + cert do servidor
 cd packages/server
@@ -80,6 +80,6 @@ gerado a partir da chave existente (estratégia A1).
 
 ## Segurança
 
-- Chaves privadas em `**/certs/` e `~/.stockio-client/` — gitignored.
+- Chaves privadas em `**/certs/` e `~/.stocksio-client/` — gitignored.
 - `JWT_SECRET` e `ADMIN_INITIAL_PASSWORD` precisam ser trocados antes de qualquer deploy.
 - Em produção real (não POC): CA private key fora do banco, em HSM ou secret manager.

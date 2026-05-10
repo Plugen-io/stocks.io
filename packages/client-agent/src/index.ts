@@ -2,7 +2,7 @@
  * Client agent — daemon Node que roda local.
  *
  * Responsabilidades:
- *   1. Detém a chave privada do device (em ~/.stockio-client/)
+ *   1. Detém a chave privada do device (em ~/.stocksio-client/)
  *   2. Faz mTLS com o servidor (rotas autenticadas)
  *   3. Expõe API HTTP em localhost para a UI consumir
  *   4. Renova cert sob demanda (CSR com chave existente — estratégia A1)

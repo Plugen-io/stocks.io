@@ -14,8 +14,8 @@ build/
 !packages/shared/src/cert-utils.ts
 
 # Estado local do client agent (contém chave privada do device)
-.stockio-client/
-~/.stockio-client/
+.stocksio-client/
+~/.stocksio-client/
 
 # Logs
 *.log

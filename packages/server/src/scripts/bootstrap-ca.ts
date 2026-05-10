@@ -16,7 +16,7 @@ import {
   generateRootCA,
   issueServerCert,
   type CASet,
-} from '@stock.io/shared/cert-utils';
+} from '@stocks.io/shared/cert-utils';
 import forge from 'node-forge';
 
 const CERTS_DIR = process.env.CERTS_DIR ?? path.resolve(process.cwd(), 'certs');

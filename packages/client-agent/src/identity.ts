@@ -1,7 +1,7 @@
 import os from 'node:os';
 import crypto from 'node:crypto';
 import { v4 as uuidv4 } from 'uuid';
-import type { DeviceIdentity } from '@stock.io/shared';
+import type { DeviceIdentity } from '@stocks.io/shared';
 
 /**
  * Gera identidade do device combinando UUID v4 + fingerprint do hardware.

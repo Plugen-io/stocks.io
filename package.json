@@ -1,5 +1,5 @@
 {
-  "name": "stock.io",
+  "name": "stocks.io",
   "private": true,
   "version": "0.1.0",
   "description": "POC mTLS — sistema de stocks com autenticação por certificado",
@@ -8,12 +8,12 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
-    "dev:server": "npm run dev --workspace=@stock.io/server",
-    "dev:agent": "npm run dev --workspace=@stock.io/client-agent",
-    "dev:ui": "npm run dev --workspace=@stock.io/client-ui",
-    "ca:bootstrap": "npm run ca:bootstrap --workspace=@stock.io/server",
-    "prisma:generate": "npm run prisma:generate --workspace=@stock.io/server",
-    "prisma:migrate": "npm run prisma:migrate --workspace=@stock.io/server"
+    "dev:server": "npm run dev --workspace=@stocks.io/server",
+    "dev:agent": "npm run dev --workspace=@stocks.io/client-agent",
+    "dev:ui": "npm run dev --workspace=@stocks.io/client-ui",
+    "ca:bootstrap": "npm run ca:bootstrap --workspace=@stocks.io/server",
+    "prisma:generate": "npm run prisma:generate --workspace=@stocks.io/server",
+    "prisma:migrate": "npm run prisma:migrate --workspace=@stocks.io/server"
   },
   "engines": {
     "node": ">=22"
