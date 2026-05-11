@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login · stocks.io admin</title>
+  <link rel="icon" type="image/svg+xml" href="/admin/static/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/static/admin.css" />
+</head>
+<body class="login-body">
+  <main class="login-shell">
+    <div class="brand">
+      <img src="/admin/static/logo-mark.svg" alt="stocks.io" />
+      <span class="brand-wordmark">stocks<span class="brand-dot">.</span>io <span class="brand-tag">admin</span></span>
+    </div>
+
+    <form method="POST" action="/admin/login" class="panel">
+      <header class="panel-header">
+        <span>Acesso restrito</span>
+        <span class="chip chip-accent">mTLS Console</span>
+      </header>
+      <div class="panel-body">
+        <% if (error) { %>
+          <div class="error-box"><%= error %></div>
+        <% } %>
+        <label>
+          <span class="label">Email</span>
+          <input type="email" name="email" required autocomplete="email" />
+        </label>
+        <label>
+          <span class="label">Senha</span>
+          <input type="password" name="password" required autocomplete="current-password" />
+        </label>
+        <button type="submit" class="btn-primary">entrar</button>
+      </div>
+    </form>
+
+    <footer class="login-footer">© 2026 plugen.io · stocks.io POC mTLS</footer>
+  </main>
+</body>
+</html>

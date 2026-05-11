@@ -8,6 +8,8 @@ import { enrollRoutes } from './routes/enroll.js';
 import { renewRoutes } from './routes/renew.js';
 import { inflowRoutes } from './routes/inflow.js';
 import { heartbeatRoutes } from './routes/heartbeat.js';
+import { adminAuthPlugins } from './admin/auth.js';
+import { adminRoutes } from './admin/routes.js';
 
 async function main() {
   // 1. Carrega CA + cert do servidor
@@ -54,12 +56,16 @@ async function main() {
     }, 'incoming');
   });
 
-  // 5. Rotas
+  // 5. Rotas mTLS / API
   await app.register(healthRoutes);
   await app.register(enrollRoutes);
   await app.register(renewRoutes);
   await app.register(inflowRoutes);
   await app.register(heartbeatRoutes);
+
+  // 6. Admin panel (JWT + cookies + EJS) — rotas /admin/*
+  await app.register(adminAuthPlugins);
+  await app.register(adminRoutes);
 
   // 6. Listen
   try {

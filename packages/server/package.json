@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && node -e \"const fs=require('node:fs');fs.cpSync('src/admin/views','dist/admin/views',{recursive:true});fs.cpSync('src/admin/public','dist/admin/public',{recursive:true});\"",
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "ca:bootstrap": "tsx src/scripts/bootstrap-ca.ts",

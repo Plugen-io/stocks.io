@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · stocks.io admin</title>
+  <link rel="icon" type="image/svg+xml" href="/admin/static/favicon.svg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/admin/static/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="/admin/static/logo-mark.svg" alt="stocks.io" />
+        <span class="brand-wordmark">stocks<span class="brand-dot">.</span>io <span class="brand-tag">admin</span></span>
+      </div>
+      <div class="topbar-right">
+        <span class="muted ticker"><%= adminEmail %></span>
+        <form method="POST" action="/admin/logout" style="margin:0">
+          <button class="btn-ghost" type="submit">sair</button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="stats-grid">
+      <div class="stat"><span class="stat-label">Devices</span><span class="stat-value"><%= stats.devices %></span></div>
+      <div class="stat"><span class="stat-label">Certs ativos</span><span class="stat-value up"><%= stats.certActive %></span></div>
+      <div class="stat"><span class="stat-label">Revogados</span><span class="stat-value down"><%= stats.certRevoked %></span></div>
+      <div class="stat"><span class="stat-label">Expirados</span><span class="stat-value muted"><%= stats.certExpired %></span></div>
+      <div class="stat">
+        <span class="stat-label">Inflow total</span>
+        <span class="stat-value ticker">R$ <%= stats.inflowTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <span>Heartbeats — últimas 24h</span>
+        <span class="muted">por device</span>
+      </header>
+      <div class="panel-body" style="padding: 1rem;">
+        <canvas id="heartbeat-chart" height="80"></canvas>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <span>Tokens de enrollment</span>
+        <button class="btn-primary" data-action="generate-token" style="font-size: 0.7rem; padding: 0.35rem 0.75rem;">+ gerar token</button>
+      </header>
+      <div class="panel-body">
+        <div id="token-output" class="token-output" hidden></div>
+        <p class="muted" style="font-size: 0.75rem; margin: 0;">
+          Tokens são uso único, expiram em 7 dias. Envie pro device enrolar via UI do client.
+        </p>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <span>Devices</span>
+        <span class="muted"><%= devices.length %> registrados</span>
+      </header>
+      <div class="device-list">
+        <% if (devices.length === 0) { %>
+          <div class="empty">Nenhum device enrolado ainda.</div>
+        <% } %>
+        <% devices.forEach(function(d) { %>
+          <% const cert = d.certificates[0]; %>
+          <% const lastSeen = d.lastSeenAt ? new Date(d.lastSeenAt) : null; %>
+          <% const lastSeenAge = lastSeen ? Math.round((Date.now() - lastSeen.getTime())/1000) : null; %>
+          <article class="device-row">
+            <div class="device-meta">
+              <div class="device-label"><%= d.label || '(sem nome)' %></div>
+              <div class="device-id ticker"><%= d.id %></div>
+              <div class="device-stats muted">
+                <%= d._count.heartbeats %> heartbeats · <%= d._count.inflows %> inflows ·
+                <% if (lastSeenAge === null) { %>nunca conectou
+                <% } else if (lastSeenAge < 60) { %><span class="up">há <%= lastSeenAge %>s</span>
+                <% } else if (lastSeenAge < 3600) { %>há <%= Math.floor(lastSeenAge/60) %>m
+                <% } else { %>há <%= Math.floor(lastSeenAge/3600) %>h
+                <% } %>
+              </div>
+            </div>
+            <% if (cert) { %>
+              <div class="cert-meta">
+                <div class="ticker"><%= cert.serialNumber.slice(0, 16) %>…</div>
+                <div class="muted">
+                  v<%= cert.version %> ·
+                  <% if (cert.status === 'active') { %><span class="up">active</span>
+                  <% } else if (cert.status === 'revoked') { %><span class="down">revoked</span>
+                  <% } else if (cert.status === 'expired') { %><span class="muted">expired</span>
+                  <% } else { %><span class="muted"><%= cert.status %></span><% } %>
+                  · expira <%= new Date(cert.expiresAt).toLocaleString('pt-BR') %>
+                </div>
+              </div>
+              <div class="device-actions">
+                <% if (cert.status === 'active') { %>
+                  <button class="btn-danger" data-action="revoke" data-cert="<%= cert.id %>">revogar</button>
+                  <button class="btn-ghost" data-action="force-renew" data-device="<%= d.id %>">forçar renew</button>
+                <% } else if (cert.status === 'revoked') { %>
+                  <button class="btn-ghost" data-action="unrevoke" data-cert="<%= cert.id %>">desrevogar</button>
+                <% } %>
+              </div>
+            <% } %>
+          </article>
+        <% }); %>
+      </div>
+    </section>
+
+    <section class="panel">
+      <header class="panel-header">
+        <span>Inflows recentes</span>
+        <span class="muted"><%= recentInflows.length %></span>
+      </header>
+      <div class="inflow-list">
+        <% if (recentInflows.length === 0) { %>
+          <div class="empty">Nenhum inflow ainda.</div>
+        <% } %>
+        <% recentInflows.forEach(function(i) { %>
+          <div class="inflow-row">
+            <div>
+              <span class="ticker"><%= i.device.label || i.deviceId.slice(0,8) %></span>
+              <span class="muted"><%= new Date(i.createdAt).toLocaleString('pt-BR') %></span>
+            </div>
+            <div class="ticker">
+              <% if (i.success) { %><span class="up">+ R$ <%= Number(i.amountBRL).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %></span>
+              <% } else { %><span class="down">R$ <%= Number(i.amountBRL).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) %> · <%= i.errorCode %></span><% } %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">© 2026 plugen.io · stocks.io POC mTLS</footer>
+
+  <script src="/admin/static/dashboard.js"></script>
+</body>
+</html>
