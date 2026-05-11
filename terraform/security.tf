@@ -1,9 +1,9 @@
 resource "aws_security_group" "stocksio" {
   name        = "stocksio-poc"
-  description = "Stocks.io POC mTLS — 22 SSH (restrito), 443 mTLS (público)"
+  description = "Stocks.io POC mTLS - 22 SSH (restricted), 443 mTLS (public)"
 
   ingress {
-    description = "SSH apenas do IP autorizado"
+    description = "SSH from authorized IP only"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -11,7 +11,7 @@ resource "aws_security_group" "stocksio" {
   }
 
   ingress {
-    description = "mTLS público (porta 443)"
+    description = "mTLS public (port 443)"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -19,7 +19,7 @@ resource "aws_security_group" "stocksio" {
   }
 
   egress {
-    description = "Saída irrestrita (apt, npm, etc)"
+    description = "Unrestricted egress (apt, npm, etc)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
