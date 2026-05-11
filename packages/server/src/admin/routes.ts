@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import fastifyView from '@fastify/view';
 import fastifyStatic from '@fastify/static';
+import fastifyFormbody from '@fastify/formbody';
 import ejs from 'ejs';
 import { prisma } from '../db/prisma.js';
 import {
@@ -17,6 +18,9 @@ import { CERT_STATUS } from '@stocks.io/shared';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export const adminRoutes: FastifyPluginAsync = async (app) => {
+  // Body parser pra formulários HTML (application/x-www-form-urlencoded)
+  await app.register(fastifyFormbody);
+
   // View engine (EJS)
   await app.register(fastifyView, {
     engine: { ejs },
