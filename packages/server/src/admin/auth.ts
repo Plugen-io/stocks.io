@@ -1,4 +1,5 @@
-import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify';
+import type { FastifyRequest, FastifyReply } from 'fastify';
+import fp from 'fastify-plugin';
 import bcrypt from 'bcrypt';
 import fastifyJwt from '@fastify/jwt';
 import fastifyCookie from '@fastify/cookie';
@@ -14,13 +15,18 @@ declare module 'fastify' {
 
 const COOKIE_NAME = 'stocksio_admin';
 
-export const adminAuthPlugins: FastifyPluginAsync = async (app) => {
+/**
+ * Wrap com fastify-plugin pra que as decorações (cookie/jwt) vazem pro escopo pai
+ * e fiquem disponíveis em todas as rotas registradas DEPOIS deste plugin
+ * (incluindo adminRoutes que usa app.jwt.sign).
+ */
+export const adminAuthPlugins = fp(async (app) => {
   await app.register(fastifyCookie);
   await app.register(fastifyJwt, {
     secret: config.jwt.secret,
     cookie: { cookieName: COOKIE_NAME, signed: false },
   });
-};
+});
 
 /**
  * preHandler para rotas /admin/* (exceto login/logout/static).
