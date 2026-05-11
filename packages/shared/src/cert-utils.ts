@@ -154,7 +154,7 @@ export function issueServerCert(opts: {
   return {
     cert: {
       certPem: forge.pki.certificateToPem(cert),
-      serialNumber: cert.serialNumber,
+      serialNumber: normalizeSerial(cert.serialNumber),
       notBefore: cert.validity.notBefore,
       notAfter: cert.validity.notAfter,
     },
@@ -199,7 +199,7 @@ export function signClientCSR(opts: {
 
   return {
     certPem: forge.pki.certificateToPem(cert),
-    serialNumber: cert.serialNumber,
+    serialNumber: normalizeSerial(cert.serialNumber),
     notBefore: cert.validity.notBefore,
     notAfter: cert.validity.notAfter,
   };
@@ -241,13 +241,24 @@ export interface CertSummary {
   fingerprintSha256: string;
 }
 
+/**
+ * Normaliza serial number pra forma canônica: lowercase, sem leading zeros.
+ *
+ * Por que: node-forge, ASN.1, e node:tls retornam o serial em formatos
+ * diferentes (com/sem padding de signedness). Padronizamos aqui pra que
+ * o lookup em DB sempre encontre.
+ */
+export function normalizeSerial(serial: string): string {
+  return serial.toLowerCase().replace(/^0+/, '') || '0';
+}
+
 export function summarizeCert(certPem: string): CertSummary {
   const cert = forge.pki.certificateFromPem(certPem);
   const cn = cert.subject.getField('CN')?.value ?? '';
   const md = forge.md.sha256.create();
   md.update(forge.asn1.toDer(forge.pki.certificateToAsn1(cert)).getBytes());
   return {
-    serialNumber: cert.serialNumber,
+    serialNumber: normalizeSerial(cert.serialNumber),
     commonName: cn,
     notBefore: cert.validity.notBefore,
     notAfter: cert.validity.notAfter,

@@ -2,7 +2,7 @@ import type { FastifyRequest, FastifyReply, FastifyPluginAsync } from 'fastify';
 import fp from 'fastify-plugin';
 import { prisma } from '../db/prisma.js';
 import { certError } from '../lib/errors.js';
-import { CERT_STATUS } from '@stocks.io/shared';
+import { CERT_STATUS, certUtils } from '@stocks.io/shared';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -45,8 +45,9 @@ export async function requireMtls(request: FastifyRequest, reply: FastifyReply) 
     return certError(reply, 'CERT_NOT_FOUND', 'No client certificate presented');
   }
 
-  // Serial vem como hex uppercase. Nosso DB guarda lowercase (do node-forge).
-  const serialNumber = peerCert.serialNumber.toLowerCase();
+  // Normaliza: node:tls retorna sem padding; node-forge pode ter padding.
+  // certUtils.normalizeSerial padroniza tudo (lowercase, sem leading zeros).
+  const serialNumber = certUtils.normalizeSerial(peerCert.serialNumber);
 
   // 3. Lookup no DB
   const certRow = await prisma.certificate.findUnique({
