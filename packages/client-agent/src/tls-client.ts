@@ -1,16 +1,29 @@
 /**
  * Cliente HTTPS pro server stocks.io.
  *
- * - `requestPublic`: HTTPS comum, valida server cert via caChain do keystore (rota /enroll, /health)
- * - `requestMtls`: HTTPS + cert/key do device (rotas autenticadas)
+ * - `requestPublic`: HTTPS comum, valida server cert via root CAs do sistema (LE)
+ *                    + opcionalmente nossa CA se ainda for self-signed
+ * - `requestMtls`: igual + cert/key do device (rotas autenticadas via mTLS)
  *
  * Usa node:https direto pra ter controle total sobre cert/key/ca por request.
+ *
+ * Estratégia de trust do server cert:
+ *  - Se STOCKSIO_TRUST_CA_FILE estiver setado, usa esse PEM (self-signed dev/test)
+ *  - Senão, deixa Node usar root certs do sistema (Mozilla bundle, incluindo LE)
+ *  Assim funciona out-of-the-box tanto em prod (cert LE) quanto em dev (self-signed
+ *  com env var apontando pra ca-v1.crt).
  */
 import https from 'node:https';
+import fs from 'node:fs';
 import { URL } from 'node:url';
 import { loadKeyPair, loadCert } from './keystore.js';
 
 const SERVER_URL = process.env.SERVER_URL ?? 'https://stocks-poc.plugen.io:443';
+
+const TRUST_CA_FILE = process.env.STOCKSIO_TRUST_CA_FILE;
+const extraTrustedCA: string | null = TRUST_CA_FILE && fs.existsSync(TRUST_CA_FILE)
+  ? fs.readFileSync(TRUST_CA_FILE, 'utf8')
+  : null;
 
 export interface HttpResult<T = unknown> {
   status: number;
@@ -22,17 +35,7 @@ export async function requestPublic<T = unknown>(
   pathname: string,
   init: { method?: string; body?: unknown } = {},
 ): Promise<HttpResult<T>> {
-  // Pra /enroll precisamos confiar no server cert. Se o keystore ainda não tem caChain
-  // (primeiro contato), usamos NODE_TLS_REJECT_UNAUTHORIZED apenas pro enrollment.
-  // Em produção real isso seria pinning de fingerprint ou TOFU.
-  let ca: string | undefined;
-  try {
-    const { caChainPem } = loadCert();
-    ca = caChainPem;
-  } catch {
-    // Sem keystore ainda — primeiro enrollment.
-  }
-  return doRequest<T>(pathname, init, { ca });
+  return doRequest<T>(pathname, init, {});
 }
 
 export async function requestMtls<T = unknown>(
@@ -40,18 +43,17 @@ export async function requestMtls<T = unknown>(
   init: { method?: string; body?: unknown } = {},
 ): Promise<HttpResult<T>> {
   const { privateKeyPem } = loadKeyPair();
-  const { certPem, caChainPem } = loadCert();
+  const { certPem } = loadCert();
   return doRequest<T>(pathname, init, {
     cert: certPem,
     key: privateKeyPem,
-    ca: caChainPem,
   });
 }
 
 function doRequest<T>(
   pathname: string,
   init: { method?: string; body?: unknown },
-  tls: { cert?: string; key?: string; ca?: string },
+  tlsOpts: { cert?: string; key?: string },
 ): Promise<HttpResult<T>> {
   return new Promise((resolve, reject) => {
     const url = new URL(pathname, SERVER_URL);
@@ -68,9 +70,11 @@ function doRequest<T>(
           'Content-Type': 'application/json',
           ...(bodyStr ? { 'Content-Length': Buffer.byteLength(bodyStr) } : {}),
         },
-        ...(tls.cert ? { cert: tls.cert } : {}),
-        ...(tls.key ? { key: tls.key } : {}),
-        ...(tls.ca ? { ca: tls.ca } : { rejectUnauthorized: false }),
+        ...(tlsOpts.cert ? { cert: tlsOpts.cert } : {}),
+        ...(tlsOpts.key ? { key: tlsOpts.key } : {}),
+        // Sem `ca` explícito → Node usa root certs do sistema (Mozilla bundle, valida LE).
+        // Com STOCKSIO_TRUST_CA_FILE → adiciona PEM custom (pra dev com self-signed).
+        ...(extraTrustedCA ? { ca: extraTrustedCA } : {}),
       },
       (res) => {
         let body = '';
