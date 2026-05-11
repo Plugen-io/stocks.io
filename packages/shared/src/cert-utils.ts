@@ -13,7 +13,7 @@ export interface KeyPairPem {
 export interface CASet {
   cert: forge.pki.Certificate;
   certPem: string;
-  privateKey: forge.pki.PrivateKey;
+  privateKey: forge.pki.rsa.PrivateKey;
   privateKeyPem: string;
 }
 
@@ -47,7 +47,7 @@ export interface CSRSubject {
 }
 
 export function generateCSR(privateKeyPem: string, publicKeyPem: string, subject: CSRSubject): string {
-  const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+  const privateKey = forge.pki.privateKeyFromPem(privateKeyPem) as forge.pki.rsa.PrivateKey;
   const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
 
   const csr = forge.pki.createCertificationRequest();
@@ -66,7 +66,7 @@ export function generateCSR(privateKeyPem: string, publicKeyPem: string, subject
   return forge.pki.certificationRequestToPem(csr);
 }
 
-export function parseCSR(csrPem: string): forge.pki.CertificateRequest {
+export function parseCSR(csrPem: string) {
   const csr = forge.pki.certificationRequestFromPem(csrPem);
   if (!csr.verify()) {
     throw new Error('Invalid CSR signature');
@@ -81,7 +81,7 @@ export function parseCSR(csrPem: string): forge.pki.CertificateRequest {
 export function generateRootCA(commonName: string, years = CERT_VALIDITY.CA_YEARS): CASet {
   const { publicKeyPem, privateKeyPem } = generateKeyPairPem();
   const publicKey = forge.pki.publicKeyFromPem(publicKeyPem);
-  const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+  const privateKey = forge.pki.privateKeyFromPem(privateKeyPem) as forge.pki.rsa.PrivateKey;
 
   const cert = forge.pki.createCertificate();
   cert.publicKey = publicKey;

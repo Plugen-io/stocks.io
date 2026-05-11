@@ -40,7 +40,7 @@ function loadCAFromDisk(version: number): CASet | null {
   return {
     cert: forge.pki.certificateFromPem(certPem),
     certPem,
-    privateKey: forge.pki.privateKeyFromPem(privateKeyPem),
+    privateKey: forge.pki.privateKeyFromPem(privateKeyPem) as forge.pki.rsa.PrivateKey,
     privateKeyPem,
   };
 }
