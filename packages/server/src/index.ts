@@ -14,6 +14,7 @@ import { adminRoutes } from './admin/routes.js';
 async function main() {
   // 1. Carrega CA + cert do servidor
   const tls = loadServerTLS();
+  console.log(`TLS: server identity from ${tls.source}, ${tls.caPems.length} client CA(s) loaded`);
 
   // 2. Bootstrap admin user (idempotente)
   const adminSeed = await seedAdminUser();
