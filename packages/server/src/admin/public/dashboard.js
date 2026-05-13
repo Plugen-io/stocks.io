@@ -1,11 +1,15 @@
 // Dashboard interactivity — chart + action buttons
 
 async function apiCall(method, path, body) {
-  const res = await fetch(path, {
-    method,
-    headers: { 'Content-Type': 'application/json' },
-    ...(body ? { body: JSON.stringify(body) } : {}),
-  });
+  // Só seta Content-Type: application/json quando realmente tem body —
+  // senão Fastify rejeita com FST_ERR_CTP_EMPTY_JSON_BODY em POSTs sem body
+  // (ex: /unrevoke, /force-renew).
+  const init = { method };
+  if (body !== undefined && body !== null) {
+    init.headers = { 'Content-Type': 'application/json' };
+    init.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, init);
   const data = await res.json().catch(() => null);
   return { ok: res.ok, status: res.status, data };
 }
