@@ -69,12 +69,12 @@ gerado a partir da chave existente (estratégia A1).
 |---|---|
 | 0. Setup AWS EC2 | aguardando user |
 | 1. CA + cripto core | feito |
-| 2. Server mTLS skeleton | a fazer |
-| 3. Endpoints (enroll, renew, inflow, heartbeat) | a fazer |
-| 4. Painel admin | a fazer |
-| 5. Client agent | a fazer |
-| 6. Client UI | a fazer |
-| 7. Cross-signing CA rotation | a fazer |
+| 2. Server mTLS skeleton | feito |
+| 3. Endpoints (enroll, renew, inflow, heartbeat) | feito |
+| 4. Painel admin | feito |
+| 5. Client agent | feito |
+| 6. Client UI | feito |
+| 7. Cross-signing CA rotation | feito |
 | 8. Cenários de teste | a fazer |
 | 9. Distribuição (pkg) | a fazer |
 
